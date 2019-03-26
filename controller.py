@@ -14,6 +14,14 @@ class ParserController:
         Soup = __gen_soup(req.data.decode('utf-8'))
         HotelInfo = __gen_hotel_info(Soup)
 
+        return Hotel(
+            __gen_hotel_name(HotelInfo),
+            __gen_hotel_adress(HotelInfo),
+            __gen_hotel_description(HotelInfo),
+            __gen_services(HotelInfo),
+            __gen_hotel_apartaments(HotelInfo)
+        )
+
 
     def __gen_soup(aSiteText):
         return BeautifulSoup(aSiteText, 'html.parser')
@@ -44,7 +52,7 @@ class ParserController:
         return result
 
 
-    def __gen_hotel_bed_types(aHotelInfo):
+    def __gen_hotel_apartaments(aHotelInfo):
         result = []
         for i in aHotelInfo.find('table', attrs={"class": "roomstable rt_no_dates dr_rt_no_dates js-dr_rt_no_dates __big-buttons rt_lightbox_enabled roomstable-no-dates-expanded"}).find_all('tr'):
             try:
