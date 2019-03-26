@@ -1,54 +1,50 @@
 import urllib3
 from bs4 import BeautifulSoup
-import Model.apartment
+import Model.apartment as ma
+import Model.hotel as mh
 
 class ParserController:
 
     def __init__(self):
-        self.Url = ""
         self.Http = urllib3.PoolManager()
 
 
-    def get_url(aUrl):
-        self.Url = aUrl
+    def gen_hotel(self, aUrl):
+        req = self.Http.request('GET', aUrl)
+        Soup = self.__gen_soup(req.data.decode('utf-8'))
+        HotelInfo = self.__gen_hotel_info(Soup)
 
-
-    def gen_hotel(aHttp):
-        req = Http.request('GET', Url)
-        Soup = __gen_soup(req.data.decode('utf-8'))
-        HotelInfo = __gen_hotel_info(Soup)
-
-        return Hotel(
-            __gen_hotel_name(HotelInfo),
-            __gen_hotel_adress(HotelInfo),
-            __gen_hotel_description(HotelInfo),
-            __gen_services(HotelInfo),
-            __gen_hotel_apartaments(HotelInfo)
+        return mh.Hotel(
+            self.__gen_hotel_name(HotelInfo),
+            self.__gen_hotel_adress(HotelInfo),
+            self.__gen_hotel_description(HotelInfo),
+            self.__gen_services(HotelInfo),
+            self.__gen_hotel_apartaments(HotelInfo)
         )
 
 
-    def __gen_soup(aSiteText):
+    def __gen_soup(self, aSiteText):
         return BeautifulSoup(aSiteText, 'html.parser')
 
 
-    def __gen_hotel_info(aSoup):
+    def __gen_hotel_info(self, aSoup):
         return aSoup.find(
                     'div',
                     attrs={"class": "rlt-right"})
 
 
-    def __gen_hotel_name(aHotelInfo):
+    def __gen_hotel_name(self, aHotelInfo):
         return aHotelInfo.find(
             'div',
             attrs={"class": "hp__hotel-title"}).find('h2').text.replace("\n", "")
 
-    def __gen_hotel_adress(aHotelInfo):
+    def __gen_hotel_adress(self, aHotelInfo):
         return aHotelInfo.find(
             'span',
             attrs={"class": " hp_address_subtitle js-hp_address_subtitle jq_tooltip "}).text.replace("\n","")
 
 
-    def __gen_hotel_description(aHotelInfo):
+    def __gen_hotel_description(self, aHotelInfo):
         result = ""
         for i in aHotelInfo.find('div', attrs={"id": "property_description_content" }).find_all('p'):
             result += i.text
@@ -56,7 +52,7 @@ class ParserController:
         return result
 
 
-    def __gen_hotel_apartaments(aHotelInfo):
+    def __gen_hotel_apartaments(self, aHotelInfo):
         result = []
         for i in aHotelInfo.find('table', attrs={"class": "roomstable rt_no_dates dr_rt_no_dates js-dr_rt_no_dates __big-buttons rt_lightbox_enabled roomstable-no-dates-expanded"}).find_all('tr'):
             try:
@@ -71,7 +67,7 @@ class ParserController:
                             pass
 
                     result.append(
-                        Apartment(
+                        ma.Apartment(
                             apartamentName,
                             apartamentCapacity,
                             apartamentBedTypes
@@ -82,7 +78,7 @@ class ParserController:
         return result
 
 
-    def __gen_services(aHotelInfo):
+    def __gen_services(self, aHotelInfo):
         result = {}
         for i in aHotelInfo.find('div', attrs={"class": "facilitiesChecklist"}).find_all('div'):
             try:
