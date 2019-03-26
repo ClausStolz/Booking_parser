@@ -9,8 +9,12 @@ class ParserController:
         self.Http = urllib3.PoolManager()
 
 
+    def get_url(aUrl):
+        self.Url = aUrl
+
+
     def gen_hotel(aHttp):
-        req = Http.request('GET',)
+        req = Http.request('GET', Url)
         Soup = __gen_soup(req.data.decode('utf-8'))
         HotelInfo = __gen_hotel_info(Soup)
 
