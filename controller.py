@@ -9,9 +9,14 @@ class ParserController:
         self.Http = urllib3.PoolManager()
 
 
+    def gen_hotel_list(self, aUrl):
+        Soup = self.__gen_soup(aUrl)
+        result = self.__gen_hotel_list(Soup)
+        return result
+
+
     def gen_hotel(self, aUrl):
-        req = self.Http.request('GET', aUrl)
-        Soup = self.__gen_soup(req.data.decode('utf-8'))
+        Soup = self.__gen_soup(aUrl)
         HotelInfo = self.__gen_hotel_info(Soup)
 
         return mh.Hotel(
@@ -23,8 +28,22 @@ class ParserController:
         )
 
 
-    def __gen_soup(self, aSiteText):
-        return BeautifulSoup(aSiteText, 'html.parser')
+    def __gen_soup(self, aUrl):
+        req = self.Http.request('GET', aUrl)
+        return BeautifulSoup(req.data.decode('utf-8'), 'html.parser')
+
+
+    def __gen_hotel_list(self, aSoup):
+        n = aSoup.find('div', attrs={"class", " nodates_hotels wider_image "})
+        result = []
+        for i in n.find_all('div'):
+            try:
+                unparsedLink = i.find('a', attrs={"class", "hotel_name_link url"})['href'].replace("\n","")
+                result.append(unparsedLink.split(';')[0])
+            except:
+                pass
+
+        return result
 
 
     def __gen_hotel_info(self, aSoup):
@@ -58,7 +77,7 @@ class ParserController:
             try:
                 apartamentCapacity = len(i.find_all('i', attrs={"class": "bicon bicon-occupancy"}))
                 if (apartamentCapacity != 0):
-                    apartamentName =i.find('div', attrs={"class": "room-info"}).find('a').text
+                    apartamentName =i.find('div', attrs={"class": "room-info"}).find('a').text.replace("\n","")
                     apartamentBedTypes = []
                     for j in i.find_all('li'):
                         try:
