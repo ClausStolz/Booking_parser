@@ -18,7 +18,7 @@ with io.open('hotels.json', 'w', encoding='utf8') as json_file:
         for i in hotel_list:
             try:
                 h = parseController.gen_hotel("https://www.booking.com" + i)
-                json_file.write(h.toJSON())
+                json_file.write(h.to_JSON())
                 json_file.write(",")
             except:
                 pass
