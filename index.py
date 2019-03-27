@@ -12,7 +12,7 @@ offset = 0
 with io.open('hotels.json', 'w', encoding='utf8') as json_file:
     json_file.write("[")
     while (offset <= 500):
-        hotel_list = parse_controller.gen_hotel_list(url + "&rows=15&offset=" + str(offset))
+        hotel_list = parse_сontroller.gen_hotel_list(url + "&rows=15&offset=" + str(offset))
         offset += 15
 
         for i in hotel_list:
@@ -22,5 +22,5 @@ with io.open('hotels.json', 'w', encoding='utf8') as json_file:
                 json_file.write(",")
             except:
                 pass
-                
+
     json_file.write("]")
