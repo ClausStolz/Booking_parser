@@ -1,3 +1,4 @@
+import json
 
 class Hotel:
 
@@ -7,3 +8,6 @@ class Hotel:
         self.Description = aDescription
         self.Services = aServices
         self.Apartments = aApartments
+
+    def toJSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__, ensure_ascii=False)
