@@ -3,103 +3,107 @@ from bs4 import BeautifulSoup
 import Model.apartment as ma
 import Model.hotel as mh
 
-class ParserController:
+class Parser_сontroller:
 
     def __init__(self):
-        self.Http = urllib3.PoolManager()
+        self.http = urllib3.PoolManager()
 
 
-    def gen_hotel_list(self, aUrl):
-        Soup = self.__gen_soup(aUrl)
-        result = self.__gen_hotel_list(Soup)
+    def gen_hotel_list(self, a_url):
+        soup = self.__gen_soup(a_url)
+        result = self.__gen_hotel_list(soup)
+
         return result
 
 
-    def gen_hotel(self, aUrl):
-        Soup = self.__gen_soup(aUrl)
-        HotelInfo = self.__gen_hotel_info(Soup)
+    def gen_hotel(self, a_url):
+        soup = self.__gen_soup(a_url)
+        hotel_info = self.__gen_hotel_info(soup)
 
         return mh.Hotel(
-            self.__gen_hotel_name(HotelInfo),
-            self.__gen_hotel_adress(HotelInfo),
-            self.__gen_hotel_description(HotelInfo),
-            self.__gen_services(HotelInfo),
-            self.__gen_hotel_apartaments(HotelInfo)
+            self.__gen_hotel_name(hotel_info),
+            self.__gen_hotel_adress(hotel_info),
+            self.__gen_hotel_description(hotel_info),
+            self.__gen_services(hotel_info),
+            self.__gen_hotel_apartaments(hotel_info)
         )
 
 
-    def __gen_soup(self, aUrl):
-        req = self.Http.request('GET', aUrl)
+    def __gen_soup(self, a_url):
+        req = self.http.request('GET', a_url)
+
         return BeautifulSoup(req.data.decode('utf-8'), 'html.parser')
 
 
-    def __gen_hotel_list(self, aSoup):
-        n = aSoup.find('div', attrs={"class", " nodates_hotels wider_image "})
+    def __gen_hotel_list(self, a_soup):
+        n = a_soup.find('div', attrs={"class", " nodates_hotels wider_image "})
         result = []
         for i in n.find_all('div'):
             try:
-                unparsedLink = i.find('a', attrs={"class", "hotel_name_link url"})['href'].replace("\n","")
-                result.append(unparsedLink.split(';')[0])
+                unparsed_link = i.find('a', attrs={"class", "hotel_name_link url"})['href'].replace("\n","")
+                result.append(unparsed_link.split(';')[0])
             except:
                 pass
 
         return result
 
 
-    def __gen_hotel_info(self, aSoup):
-        return aSoup.find(
-                    'div',
-                    attrs={"class": "rlt-right"})
+    def __gen_hotel_info(self, a_soup):
+        return a_soup.find(
+            'div',
+            attrs={"class": "rlt-right"})
 
 
-    def __gen_hotel_name(self, aHotelInfo):
-        return aHotelInfo.find(
+    def __gen_hotel_name(self, a_hotel_info):
+        return a_hotel_info.find(
             'div',
             attrs={"class": "hp__hotel-title"}).find('h2').text.replace("\n", "")
 
-    def __gen_hotel_adress(self, aHotelInfo):
-        return aHotelInfo.find(
+
+    def __gen_hotel_adress(self, a_hotel_info):
+        return a_hotel_info.find(
             'span',
             attrs={"class": " hp_address_subtitle js-hp_address_subtitle jq_tooltip "}).text.replace("\n","")
 
 
-    def __gen_hotel_description(self, aHotelInfo):
+    def __gen_hotel_description(self, a_hotel_info):
         result = ""
-        for i in aHotelInfo.find('div', attrs={"id": "property_description_content" }).find_all('p'):
+        for i in a_hotel_info.find('div', attrs={"id": "property_description_content" }).find_all('p'):
             result += i.text
 
         return result
 
 
-    def __gen_hotel_apartaments(self, aHotelInfo):
+    def __gen_hotel_apartaments(self, a_hotel_info):
         result = []
-        for i in aHotelInfo.find('table', attrs={"class": "roomstable rt_no_dates dr_rt_no_dates js-dr_rt_no_dates __big-buttons rt_lightbox_enabled roomstable-no-dates-expanded"}).find_all('tr'):
+        for i in a_hotel_info.find('table', attrs={"class": "roomstable rt_no_dates dr_rt_no_dates js-dr_rt_no_dates __big-buttons rt_lightbox_enabled roomstable-no-dates-expanded"}).find_all('tr'):
             try:
-                apartamentCapacity = len(i.find_all('i', attrs={"class": "bicon bicon-occupancy"}))
-                if (apartamentCapacity != 0):
-                    apartamentName =i.find('div', attrs={"class": "room-info"}).find('a').text.replace("\n","")
-                    apartamentBedTypes = []
+                apartament_capacity = len(i.find_all('i', attrs={"class": "bicon bicon-occupancy"}))
+                if (apartament_capacity != 0):
+                    apartament_name =i.find('div', attrs={"class": "room-info"}).find('a').text.replace("\n","")
+                    apartament_bed_types = []
                     for j in i.find_all('li'):
                         try:
-                            apartamentBedTypes.append(j.text.replace("\n", ""))
+                            apartament_bed_types.append(j.text.replace("\n", ""))
                         except:
                             pass
 
                     result.append(
                         ma.Apartment(
-                            apartamentName,
-                            apartamentCapacity,
-                            apartamentBedTypes
-                            )
+                            apartament_name,
+                            apartament_capacity,
+                            apartament_bed_types
                         )
+                    )
             except:
                 pass
+
         return result
 
 
-    def __gen_services(self, aHotelInfo):
+    def __gen_services(self, a_hotel_info):
         result = {}
-        for i in aHotelInfo.find('div', attrs={"class": "facilitiesChecklist"}).find_all('div'):
+        for i in a_hotel_info.find('div', attrs={"class": "facilitiesChecklist"}).find_all('div'):
             try:
                 service_name = i.find('h5').text.replace("\n", "")
                 service_list = []
